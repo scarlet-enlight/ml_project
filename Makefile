@@ -84,3 +84,31 @@ export PRINT_HELP_PYSCRIPT
 
 help:
 	@$(PYTHON_INTERPRETER) -c "${PRINT_HELP_PYSCRIPT}" < $(MAKEFILE_LIST)
+
+
+#################################################################################
+# Machine learning commands                                                     #
+#################################################################################
+
+# Default parameters
+DATA=data/processed/Sleep_health_and_lifestyle_dataset.csv
+TARGET='Sleep Disorder'
+# PREDICT_DATA
+# OUTPUT_KNN=predictions.csv
+
+## Training a KNN classificator
+.PHONY: train-knn
+train-knn:
+	@echo "Training a KNN model"
+	@$(PYTHON_INTERPRETER) src/modeling/train.py --model knn --data $(DATA) --target-column $(TARGET)
+
+## Training a Naive Bayes classificator
+.PHONY: train-gnb
+train-gnb:
+	@echo "Training a Gaussian Naive Bayes model"
+	@$(PYTHON_INTERPRETER) src/modeling/train.py --model gnb --data $(DATA) --target-column $(TARGET)
+
+## Training all models
+.PHONY: train-all
+train-all: train-knn train-gnb
+	@echo "Models were trained"
