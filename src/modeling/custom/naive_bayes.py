@@ -18,16 +18,19 @@ class NaiveBayes:
         self.params = {
             c: {
                 'mean': X[y == c].mean(axis=0),
-                'std': X[y == c].mean(axis=0),
+                'std': X[y == c].std(axis=0),
             }
             for c in self.classes
         }
 
     def gauss(self, x, mu, sigma, eps=1e-9):
         sigma = np.clip(sigma, eps, None)
-        return (1 / (sqrt(2 * pi) * sigma)) * exp(-((x - mu) ** 2)) / (2 * sigma ** 2)
+        return (1 / (sqrt(2 * pi) * sigma)) * exp(-((x - mu) ** 2) / (2 * sigma ** 2))
 
     def predict(self, X):
+        if X.ndim == 1:
+            X = X.reshape(1, -1)
+
         preds = []
         for x in X:
             best_class, best_logp = None, -np.inf
