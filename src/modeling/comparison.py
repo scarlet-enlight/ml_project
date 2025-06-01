@@ -15,6 +15,7 @@ DATA_DIR = "data/"
 PROCESSED_DATA_DIR = f'{DATA_DIR}processed/'
 from custom.knn import KNN
 from custom.naive_bayes import NaiveBayes
+from custom.decision_tree import DecisionTree
 from train import load_dataset, split_data
 from src.config import PROCESSED_DATA_DIR
 
@@ -41,7 +42,8 @@ def compare_models(
 
     models = {
         "KNN": KNN(k=4),
-        "Naive Bayes": NaiveBayes()
+        "Naive Bayes": NaiveBayes(),
+        "Decision Tree": DecisionTree()
     }
 
     results = []

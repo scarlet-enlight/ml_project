@@ -1,22 +1,26 @@
 from sklearn.tree import DecisionTreeClassifier
+import pandas as pd
 
 class DecisionTree:
-    def __init__(self, random_state=42, param_grid=None):
-        self.random_state = random_state
-        self.param_grid = param_grid or {
-            'max_depth': range(1, 11),
-            'min_samples_split': range(2, 11),
-            'criterion': ['gini', 'entropy']
-        }
-        self.model = None
-        self.best_params_ = None
+    def __init__(self):
+        self.model = DecisionTreeClassifier(random_state=42)
+        self.is_trained = False
 
     def fit(self, X_train, y_train):
-        self.model.fit(X_train, y_train)
+        self.X = X_train
+        self.y = y_train
+        if X_train is None or y_train is None:
+            raise ValueError("X_train and y_train cannot be None.")
+        self.model.fit(self.X, self.y)
         self.is_trained = True
 
     def predict(self, X):
         if not self.is_trained:
-            return False
+            raise RuntimeError("Model must be trained before prediction.")
+        if isinstance(X, (list, tuple)) or X.ndim == 1:
+            X = pd.DataFrame([X], columns=self.X.columns)
+        elif isinstance(X, pd.DataFrame):
+            X = X[self.X.columns]
         else:
-            return self.model.predict(X)
+            X = pd.DataFrame(X, columns=self.X.columns)
+        return self.model.predict(X)
