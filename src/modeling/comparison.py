@@ -21,7 +21,8 @@ app = typer.Typer()
 def compare_models(
     data_path: Path = typer.Option(PROCESSED_DATA_DIR / "Sleep_health_and_lifestyle_dataset.csv", help="Path to CSV data"),
     target_column: str = typer.Option("Sleep Disorder", help="Target column name"),
-    train_ratio: float = typer.Option(0.6, help="Train-test split ratio")
+    train_ratio: float = typer.Option(0.6, help="Train-test split ratio"),
+    show_details: bool = typer.Option(False, help="Show confusion matrix and classification report")
 ):
     df = load_dataset(str(data_path))
 
@@ -32,7 +33,7 @@ def compare_models(
         typer.secho(f"Column '{target_column}' not found in dataset!", fg=typer.colors.RED)
         typer.echo(f"Available columns: {df.columns.tolist()}")
         raise typer.Exit(code=1)
-    
+
     X_train, X_test, y_train, y_test = split_data(df, target_column_normalized, train_ratio)
 
     models = {
@@ -40,28 +41,51 @@ def compare_models(
         "Naive Bayes": NaiveBayes()
     }
 
-    for name, model in models.items():
-        typer.echo(f"\n========== {name.upper()} ==========")
-        model.fit(X_train, y_train)
+    results = []
 
+    for name, model in models.items():
+        model.fit(X_train, y_train)
         y_pred = [model.predict(x) for x in X_test.values]
 
         acc = accuracy_score(y_test, y_pred)
         prec = precision_score(y_test, y_pred, average='macro', zero_division=0)
         rec = recall_score(y_test, y_pred, average='macro', zero_division=0)
         f1 = f1_score(y_test, y_pred, average='macro', zero_division=0)
-        cm = confusion_matrix(y_test, y_pred)
-        report = classification_report(y_test, y_pred, zero_division=0)
 
-        typer.echo(f"Accuracy       : {acc:.4f}")
-        typer.echo(f"Precision (avg): {prec:.4f}")
-        typer.echo(f"Recall (avg)   : {rec:.4f}")
-        typer.echo(f"F1-score (avg) : {f1:.4f}")
-        typer.echo("\nConfusion Matrix:")
-        typer.echo(pd.DataFrame(cm))
-        typer.echo("\nClassification Report:")
-        typer.echo(report)
+        results.append({
+            "Model": name,
+            "Accuracy": acc,
+            "Precision": prec,
+            "Recall": rec,
+            "F1 Score": f1
+        })
 
+        if show_details:
+            typer.echo(f"\n----- {name} -----")
+            cm = confusion_matrix(y_test, y_pred)
+            report = classification_report(y_test, y_pred, zero_division=0)
+            typer.echo("Confusion Matrix:")
+            typer.echo(pd.DataFrame(cm))
+            typer.echo("\nClassification Report:")
+            typer.echo(report)
+
+    df_results = pd.DataFrame(results).set_index("Model")
+    typer.echo("\n=== Model Comparison Summary ===")
+    typer.echo(df_results.round(4))
+
+    html_output = Path(__file__).parent / "model_comparison.html"
+    styled = df_results.style \
+        .highlight_max(color="lightgreen", axis=0) \
+        .set_caption("Model Performance Comparison") \
+        .format("{:.4f}") \
+        .set_table_styles([
+            {"selector": "caption", "props": [("caption-side", "top"), ("font-size", "1.2em"), ("font-weight", "bold")]},
+            {"selector": "th", "props": [("background-color", "#f2f2f2"), ("text-align", "center")]},
+            {"selector": "td", "props": [("text-align", "center")]}
+        ])
+    styled.to_html(html_output)
+
+    typer.secho(f"\nComparison HTML saved to: {html_output}", fg=typer.colors.GREEN)
 
 if __name__ == "__main__":
     app()
