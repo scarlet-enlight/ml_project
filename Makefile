@@ -108,7 +108,19 @@ train-gnb:
 	@echo "Training a Gaussian Naive Bayes model"
 	@$(PYTHON_INTERPRETER) src/modeling/train.py --model gnb --data $(DATA) --target-column $(TARGET)
 
+## Training a Decision Tree classificator
+.PHONY: train-tre
+train-tre:
+	@echo "Training a Decision Tree model"
+	@$(PYTHON_INTERPRETER) src/modeling/train.py --model tre --data $(DATA) --target-column $(TARGET)
+
 ## Training all models
 .PHONY: train-all
-train-all: train-knn train-gnb
+train-all: train-knn train-gnb train-tre
 	@echo "Models were trained"
+
+## Launching full program
+.PHONY: launch
+launch:
+	@echo "Starting a Model Comparison."
+	python src/modeling/comparison.py
