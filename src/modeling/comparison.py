@@ -10,6 +10,9 @@ from sklearn.metrics import (
     confusion_matrix
 )
 
+PROJ_ROOT = Path(__file__).resolve().parents[1]
+DATA_DIR = "data/"
+PROCESSED_DATA_DIR = f'{DATA_DIR}processed/'
 from custom.knn import KNN
 from custom.naive_bayes import NaiveBayes
 from train import load_dataset, split_data
@@ -19,7 +22,7 @@ app = typer.Typer()
 
 @app.command()
 def compare_models(
-    data_path: Path = typer.Option(PROCESSED_DATA_DIR / "Sleep_health_and_lifestyle_dataset.csv", help="Path to CSV data"),
+    data_path: Path = typer.Option(f"{PROCESSED_DATA_DIR}Sleep_health_and_lifestyle_dataset.csv", help="Path to CSV data"),
     target_column: str = typer.Option("Sleep Disorder", help="Target column name"),
     train_ratio: float = typer.Option(0.6, help="Train-test split ratio"),
     show_details: bool = typer.Option(False, help="Show confusion matrix and classification report")
