@@ -5,6 +5,8 @@ class DecisionTree:
     def __init__(self):
         self.model = DecisionTreeClassifier(random_state=42)
         self.is_trained = False
+        print("Rzeczywista głębokość drzewa:", model.get_depth())
+        print("Liczba liści:", model.get_n_leaves())
 
     def fit(self, X_train, y_train):
         self.X = X_train
