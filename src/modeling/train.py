@@ -6,6 +6,7 @@ import typer
 from src.config import MODELS_DIR, PROCESSED_DATA_DIR
 from custom.knn import KNN
 from custom.naive_bayes import NaiveBayes
+from custom.decision_tree import DecisionTree
 from sklearn.model_selection import train_test_split
 
 
@@ -46,6 +47,8 @@ def train(
         classifier = KNN(k=4)
     elif model == "gnb":
         classifier = NaiveBayes()
+    elif model == "tre":
+        classifier = DecisionTree()
     else:
         typer.echo("Bad model name")
         raise typer.Exit(code=1)
